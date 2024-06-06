@@ -187,25 +187,26 @@
     return nil;
 }
 
-+ (NSString *) encrypt: (NSString *)clearText key: (NSString *)key iv: (NSString *)iv algorithm: (NSString *)algorithm {
+//Modify so that incomming data is assumed to be base64, not utf8
++ (NSString *) encrypt: (NSString *)base64String key: (NSString *)key iv: (NSString *)iv algorithm: (NSString *)algorithm {
     if ([algorithm containsString:@"ctr"]) {
-        NSData *result = [self AESCTR:@"encrypt" data:[clearText dataUsingEncoding:NSUTF8StringEncoding] key:key iv:iv algorithm:algorithm];
-        return [self toHex:result];
+        NSData *result = [self AESCTR:@"encrypt" data:[[NSData alloc] initWithBase64EncodedString:base64String options:0] key:key iv:iv algorithm:algorithm];
+        return [result base64EncodedStringWithOptions:0];
     }
     else{
-        NSData *result = [self AESCBC:@"encrypt" data:[clearText dataUsingEncoding:NSUTF8StringEncoding] key:key iv:iv algorithm:algorithm];
+        NSData *result = [self AESCBC:@"encrypt" data:[[NSData alloc] initWithBase64EncodedString:base64String options:0] key:key iv:iv algorithm:algorithm];
         return [result base64EncodedStringWithOptions:0];
     }
 }
 
 + (NSString *) decrypt: (NSString *)cipherText key: (NSString *)key iv: (NSString *)iv algorithm: (NSString *)algorithm {
     if ([algorithm containsString:@"ctr"]) {
-        NSData *result = [self AESCTR:@"decrypt" data:[self fromHex:cipherText] key:key iv:iv algorithm:algorithm];
-        return [[NSString alloc] initWithData:result encoding:NSUTF8StringEncoding];
+        NSData *result = [self AESCTR:@"decrypt" data:[[NSData alloc] initWithBase64EncodedString:cipherText options:0] key:key iv:iv algorithm:algorithm];
+        return [result base64EncodedStringWithOptions:0];
     }
     else{
         NSData *result = [self AESCBC:@"decrypt" data:[[NSData alloc] initWithBase64EncodedString:cipherText options:0] key:key iv:iv algorithm:algorithm];
-        return [[NSString alloc] initWithData:result encoding:NSUTF8StringEncoding];
+        return [result base64EncodedStringWithOptions:0];
     }
 }
 
